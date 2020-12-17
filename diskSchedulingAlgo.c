@@ -1,87 +1,154 @@
 #include<stdio.h>
+#include<string.h>
 #include<stdlib.h>
-#include<stdbool.h> 
-int number_of_processes,resource_types,not_enough_resources=0,allocated[20][5],max[20][5],total_resources[5];
-bool finished[20];
-void execute(int i)
+#include<stdbool.h>
+int locations[30],locations2[35],n,n2,end,head;
+bool served[30];
+bool completed()
 {
-    for(int j=0;j<resource_types;j++)
-        total_resources[j]=total_resources[j]+allocated[i][j];
-}
-bool finished_execution()
-{
-    not_enough_resources++;
-    if(not_enough_resources>number_of_processes+1)
-    {
-        printf("\n\n ERROR OCCURED: NOT ENOUGH RESOURCES\n");
-        exit(0);
-    }
-    for(int i=0;i<number_of_processes;i++)
-        if(finished[i]==false)
+    for(int i=0;i<n;i++)
+        if(served[i]==false)
             return false;
     return true;
 }
+int time()
+{
+    int sum=0;
+    for(int i=0;i<n2-1;i++)
+        sum=sum+abs(locations2[i]-locations2[i+1]);
+    return sum;
+}
+void sort()
+{
+    for(int i=0;i<n-1;i++)
+        for(int j=0;j<n-i-1;j++)
+            if(locations[j]>locations[j+1])
+            {
+                int temp=locations[j];
+                locations[j]=locations[j+1];
+                locations[j+1]=temp;
+            }
+ }
+void fcfs()
+{
+    printf("THE ORDER IS:\n%d->",head);
+    for(int i=0;i<n;i++)
+      {
+        printf("%d->",locations[i]);
+        locations2[i+1]=locations[i];
+      }
+}
+void scan()
+{
+     sort();
+    printf("HEAD MOVES FROM L TO R\nTHE ORDER IS:\n%d->",head);
+    int i=0,temp=-1,q=0;
+    while(locations[i]<head)
+        i++;
+    temp=i;
+    while(i!=n)
+    {
+        printf("%d->",locations[i]);
+        locations2[q+1]=locations[i];
+        q++;
+        i++;
+    }
+    printf("%d->",end);
+    n2++;
+    locations2[q+1]=end;
+    q++;
+    i=temp;
+    if(temp-1>=0)
+        i=temp-1;
+        
+    while(i>=0)
+    {
+        printf("%d->",locations[i]);
+        locations2[q+1]=locations[i];
+        q++;
+        i--;
+    }
+}
+void cscan()
+{
+    sort();
+    int q=0;
+    printf("HEAD MOVES FROM L TO R\nTHE ORDER IS:\n%d->",head);
+    int i=0,temp=-1;
+    while(locations[i]<head)
+        i++;
+    while(i!=n)
+    {
+        printf("%d->",locations[i]);
+        locations2[q+1]=locations[i];
+        q++;
+        i++;
+    }
+    printf("%d->0->",end);
+    locations2[q+1]=end;
+    q++;
+    n2++;
+    i=0;
+    n2++;
+    locations2[q+1]=0;
+    q++;
+    while(locations[i]<head)
+    {
+        printf("%d->",locations[i]);
+        locations2[q+1]=locations[i];
+        q++;
+        i++;
+    }
+}
+void menu()
+{
+    char string[100],temp[10];
+    int input,i=0,j=0,k=0;
+    for(int q=0;q<30;q++)
+        served[q]=false;
+    printf("\n\nEnter final position of the disk: ");
+    scanf("%d",&end);
+    printf("\nEnter locations: ");
+    fgets(string,100,stdin);
+    fgets(string,100,stdin);
+    while(string[i]!='\0')
+    {
+        if(string[i]==' ')
+        {
+            sscanf(temp, "%d", &locations[j]);
+            strcpy(temp,"");
+            k=0;
+            j++;
+        }
+        else
+            temp[k++]=string[i];
+        i++;
+    }
+    sscanf(temp, "%d", &locations[j]);
+    n=j+1;
+    n2=n+1;
+    printf("Enter head location: ");
+    scanf("%d",&head);  
+    printf("\n1.FCFS\n2.SCAN\n3.CSCAN\nSELECT AN ALGORITHM: ");
+    scanf("%d",&input);
+    printf("\n\n");
+    locations2[0]=head;
+    switch(input)
+    {
+        case 1:fcfs();
+            break;
+        case 2:scan();
+            break;
+        case 3:cscan();
+            break;
+        default:menu();
+    }
+    printf("STOP");
+    printf("\n\nSEEK TIME: %d",time());
+    printf("\nAVERAGE SEEK TIME: %d",time()/n);
+    menu();
+}
 void main()
 {
-    printf("How many processes are running ");
-    scanf("%d",&number_of_processes);
-    printf("Enter the number of resource types ");
-    scanf("%d",&resource_types);
-    if(resource_types>5)
-    {
-        printf("TOO MANY RESOURCE TYPES\n");
-        exit(0);
-    }
-    printf("Enter the  allocated resources for each process");
-    for(int i=0;i<number_of_processes;i++)
-    {
-        printf("\n\nPROCESS NUMBER:%d\n\n",i);
-        for(int j=0;j<resource_types;j++)
-        {
-            printf(" RESOURCE NUMBER %d-> ",j);
-            scanf("%d",&allocated[i][j]);
-        }
-    }
-    printf("\n\n\nEnter the max resources for each process");
-    for(int i=0;i<number_of_processes;i++)
-    {
-        printf("\n\nPROCESS NUMBER:%d\n\n",i);
-        for(int j=0;j<resource_types;j++)
-        {
-            printf(" RESOURCE NUMBER %d-> ",j);
-            scanf("%d",&max[i][j]);
-        }
-    }
-    printf("\n\nEnter the total available resources\n");
-    for(int i=0;i<resource_types;i++)
-    {
-        printf("RESOURCE NUMBER %d->",i);
-        scanf("%d",&total_resources[i]);
-    }
-    
-    while(!finished_execution())
-    {
-        for(int i=0;i<number_of_processes;i++)
-        {
-            bool possible=true;
-            for(int j=0;j<resource_types;j++)
-            {
-                
-                if(max[i][j]-allocated[i][j]>total_resources[j] && finished[i]==false)
-                    possible=false;
-            }
-            if(possible==true && finished[i]==false )
-            {
-                execute(i);
-                if(finished[i]==false)
-                {
-                    printf("PROCESS %d FINISHED EXECUTION. TOTAL RESOURCES=[",i);
-                    for(int k=0;k<resource_types;k++)
-                        printf(" %d",total_resources[k]);
-                    printf(" ]\n");
-                }
-                finished[i]=true;
-            }
-        }
-    }
+    menu();
 }
